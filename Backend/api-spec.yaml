@@ -34,10 +34,22 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountDTO'
     post:
       tags:
         - Account
       summary: Create a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDTO'
       responses:
         201:
           description: Created
@@ -56,6 +68,58 @@ paths:
       responses:
         200:
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDTO'
+
+  /accounts/{accountId}/balance:
+    get:
+      tags:
+        - Account
+      summary: Get account balance
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  balance:
+                    type: number
+                    format: decimal
+
+  /accounts/{accountId}/status:
+    put:
+      tags:
+        - Account
+      summary: Update account status
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, FROZEN, CLOSED]
+      responses:
+        200:
+          description: Status updated successfully
 
   /transactions:
     get:
@@ -92,6 +156,29 @@ paths:
           description: OK
 
 components:
+  schemas:
+    AccountDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+        accountNumber:
+          type: string
+        userId:
+          type: string
+          description: "Formatted user identifier (e.g., BNK-USR-1001)"
+        balance:
+          type: number
+          format: decimal
+        type:
+          type: string
+          enum: [SAVINGS, CURRENT]
+        status:
+          type: string
+          enum: [ACTIVE, FROZEN, CLOSED]
+        createdAt:
+          type: string
+          format: date-time
   securitySchemes:
     bearerAuth:
       type: http
