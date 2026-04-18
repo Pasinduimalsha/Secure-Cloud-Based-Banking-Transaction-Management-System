@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Banking Transaction Management System API
+  description: API documentation for the Secure Cloud-Based Banking Transaction Management System.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+    description: API Gateway
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: User Login
+      responses:
+        200:
+          description: OK
+  
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: User Registration
+      responses:
+        201:
+          description: Created
+
+  /accounts:
+    get:
+      tags:
+        - Account
+      summary: List all accounts
+      responses:
+        200:
+          description: OK
+    post:
+      tags:
+        - Account
+      summary: Create a new account
+      responses:
+        201:
+          description: Created
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Account
+      summary: Get account details
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+
+  /transactions:
+    get:
+      tags:
+        - Transaction
+      summary: List all transactions
+      responses:
+        200:
+          description: OK
+    post:
+      tags:
+        - Transaction
+      summary: Create a new transaction
+      responses:
+        201:
+          description: Created
+
+  /audit/logs:
+    get:
+      tags:
+        - Audit
+      summary: Retrieve audit logs
+      responses:
+        200:
+          description: OK
+
+  /notifications:
+    get:
+      tags:
+        - Notification
+      summary: List notifications
+      responses:
+        200:
+          description: OK
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
