@@ -1,7 +1,24 @@
 version: '3.8'
 
 services:
-  # Redis for Idempotency and Caching
+  # ---------------- Infrastructure ---------------- #
+  mysql-db:
+    image: mysql:8.0
+    container_name: banking-mysql
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: Pasiya12
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+
   redis:
     image: redis:alpine
     container_name: banking-redis
@@ -11,7 +28,6 @@ services:
       - redis_data:/data
     restart: always
 
-  # RabbitMQ for Asynchronous Messaging
   rabbitmq:
     image: rabbitmq:3-management
     container_name: banking-rabbitmq
@@ -25,11 +41,95 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: always
 
+  # ---------------- Microservices ---------------- #
+  api-gateway:
+    build: 
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: banking-api-gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - account-service
+      - transaction-service
+      - audit-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://account-service:8082
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://transaction-service:8083
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_URI=http://audit-service:8084
+    restart: always
+
+  account-service:
+    build: 
+      context: ./Backend/account-service
+      dockerfile: Dockerfile
+    container_name: banking-account-service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/accountService?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Pasiya12
+    restart: always
+
+  transaction-service:
+    build: 
+      context: ./Backend/transaction-service
+      dockerfile: Dockerfile
+    container_name: banking-transaction-service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/transactionService?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Pasiya12
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    restart: always
+
+  audit-service:
+    build: 
+      context: ./Backend/audit-service
+      dockerfile: Dockerfile
+    container_name: banking-audit-service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/auditService?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Pasiya12
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    restart: always
+
+  notification-service:
+    build: 
+      context: ./Backend/notification-service
+      dockerfile: Dockerfile
+    container_name: banking-notification-service
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    restart: always
+
 networks:
   default:
     name: banking-network
 
 volumes:
+  mysql_data:
+    name: banking_mysql_data
   redis_data:
     name: banking_redis_data
   rabbitmq_data:
