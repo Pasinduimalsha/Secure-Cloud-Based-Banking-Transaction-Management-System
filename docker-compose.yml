@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # Redis for Idempotency and Caching
+  redis:
+    image: redis:alpine
+    container_name: banking-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+  # RabbitMQ for Asynchronous Messaging
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: banking-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: always
+
+networks:
+  default:
+    name: banking-network
+
+volumes:
+  redis_data:
+    name: banking_redis_data
+  rabbitmq_data:
+    name: banking_rabbitmq_data

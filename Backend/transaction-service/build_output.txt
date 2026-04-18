@@ -1,0 +1,31 @@
+
+> Task :compileJava FAILED
+/Users/pasindumallawarachchi/Documents/NonAcadamic/MainProjects/Secure-Cloud-Based-Banking-Transaction-Management-System/Backend/transaction-service/src/main/java/com/cloud/transaction_service/entity/Outbox.java:31: warning: @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+    private boolean processed = false;
+                    ^
+/Users/pasindumallawarachchi/Documents/NonAcadamic/MainProjects/Secure-Cloud-Based-Banking-Transaction-Management-System/Backend/transaction-service/src/main/java/com/cloud/transaction_service/config/RabbitMQConfig.java:45: error: cannot find symbol
+    public JacksonJsonMessageConverter jsonMessageConverter(objectMapper objectMapper) {
+                                                            ^
+  symbol:   class objectMapper
+  location: class RabbitMQConfig
+1 error
+1 warning
+
+[Incubating] Problems report is available at: file:///Users/pasindumallawarachchi/Documents/NonAcadamic/MainProjects/Secure-Cloud-Based-Banking-Transaction-Management-System/Backend/transaction-service/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  /Users/pasindumallawarachchi/Documents/NonAcadamic/MainProjects/Secure-Cloud-Based-Banking-Transaction-Management-System/Backend/transaction-service/src/main/java/com/cloud/transaction_service/entity/Outbox.java:31: warning: @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+      private boolean processed = false;
+                      ^
+  1 error
+  1 warning
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 2s
+1 actionable task: 1 executed
