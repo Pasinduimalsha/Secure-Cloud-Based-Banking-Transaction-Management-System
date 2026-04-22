@@ -49,15 +49,33 @@ services:
     container_name: banking-api-gateway
     ports:
       - "8000:8000"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SERVICE_AUTH_URL=http://auth-service:8081
+      - SERVICE_ACCOUNT_URL=http://account-service:8082
+      - SERVICE_TRANSACTION_URL=http://transaction-service:8083
+      - SERVICE_AUDIT_URL=http://audit-service:8084
+      - SERVICE_NOTIFICATION_URL=http://notification-service:8085
     depends_on:
+      - auth-service
       - account-service
       - transaction-service
       - audit-service
+      - notification-service
+    restart: always
+
+  auth-service:
+    build:
+      context: ./Backend/auth-service
+      dockerfile: Dockerfile
+    container_name: banking-auth-service
+    depends_on:
+      mysql-db:
+        condition: service_healthy
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://account-service:8082
-      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://transaction-service:8083
-      - SPRING_CLOUD_GATEWAY_ROUTES_3_URI=http://audit-service:8084
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/authService?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Pasiya12
     restart: always
 
   account-service:
