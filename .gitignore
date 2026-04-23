@@ -17,3 +17,4 @@ out/
 # Application Specific
 **/application-local.properties
 init-db.sh
+docker-compose-infra.yml

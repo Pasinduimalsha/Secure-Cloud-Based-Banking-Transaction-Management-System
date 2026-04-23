@@ -210,3 +210,84 @@ logging.level.root=INFO
 - **Transaction Service**: Port 8083, DB `transactionService`
 - **Audit Service**: Port 8084, DB `auditService`
 - **Notification Service**: Port 8085, DB `notificationService`
+
+---
+
+## 9. API Gateway Patterns
+
+The API Gateway uses the **Spring Cloud Gateway MVC** functional routing style. This approach uses `RouterFunction` beans instead of YAML-based configuration for better type safety and programatic control (like adding Circuit Breakers).
+
+### Standard Route Configuration
+All gateway routes should be centralized in a `@Configuration` class using `GatewayRouterFunctions`.
+
+```java
+package com.pasi.api_gateway.config;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.server.mvc.filter.CircuitBreakerFilterFunctions;
+import org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions;
+import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.function.RequestPredicates;
+import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.ServerResponse;
+
+import java.net.URI;
+
+import static org.springframework.cloud.gateway.server.mvc.filter.FilterFunctions.setPath;
+import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions.route;
+
+@Configuration
+public class Routes {
+
+    @Value("${account.service.url}")
+    private String accountServiceUrl;
+    @Value("${transaction.service.url}")
+    private String transactionServiceUrl;
+    @Value("${audit.service.url}")
+    private String auditServiceUrl;
+
+    @Bean
+    public RouterFunction<ServerResponse> accountServiceRoute() {
+        return GatewayRouterFunctions.route("account_service")
+                .route(RequestPredicates.path("/api/v1/accounts/**"), HandlerFunctions.http(accountServiceUrl))
+                .filter(CircuitBreakerFilterFunctions.circuitBreaker("accountServiceCircuitBreaker",
+                        URI.create("forward:/fallbackRoute")))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> transactionServiceRoute() {
+        return GatewayRouterFunctions.route("transaction_service")
+                .route(RequestPredicates.path("/api/v1/transactions/**"), HandlerFunctions.http(transactionServiceUrl))
+                .filter(CircuitBreakerFilterFunctions.circuitBreaker("transactionServiceCircuitBreaker",
+                        URI.create("forward:/fallbackRoute")))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> auditServiceRoute() {
+        return GatewayRouterFunctions.route("audit_service")
+                .route(RequestPredicates.path("/api/v1/audit/**"), HandlerFunctions.http(auditServiceUrl))
+                .filter(CircuitBreakerFilterFunctions.circuitBreaker("auditServiceCircuitBreaker",
+                        URI.create("forward:/fallbackRoute")))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> fallbackRoute() {
+        return route("fallbackRoute")
+                .GET("/fallbackRoute", request -> ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body("Service Unavailable, please try again later"))
+                .build();
+    }
+}
+```
+
+### Key Principles for Gateway:
+- **Circuit Breakers**: Always include a `.filter(CircuitBreakerFilterFunctions.circuitBreaker(...))` for every backend route to prevent cascading failures.
+- **Fallback Methods**: Centralize fallback logic (like the `/fallbackRoute` above) to provide a consistent error message when services are down.
+- **Swagger Aggregation**: Use `.filter(setPath("/api-docs"))` to map external documentation paths to internal service documentation endpoints.
+
