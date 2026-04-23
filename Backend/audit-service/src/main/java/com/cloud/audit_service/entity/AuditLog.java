@@ -1,12 +1,14 @@
 package com.cloud.audit_service.entity;
 
-import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "audit_logs")
+@Document(collection = "audit_logs")
 @Data
 @Builder
 @NoArgsConstructor
@@ -14,38 +16,30 @@ import java.time.LocalDateTime;
 public class AuditLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id; // MongoDB IDs are typically Strings (ObjectIds)
 
-    @Column(name = "transaction_id", nullable = false)
+    @Field("transaction_id")
     private Long transactionId;
 
-    @Column(name = "request_key", nullable = false)
+    @Field("request_key")
     private String requestKey;
 
-    @Column(name = "sender_account_id")
+    @Field("sender_account_id")
     private Long senderAccountId;
 
-    @Column(name = "receiver_account_id")
+    @Field("receiver_account_id")
     private Long receiverAccountId;
 
-    @Column(nullable = false)
     private BigDecimal amount;
 
-    @Column(nullable = false)
     private String type;
 
-    @Column(nullable = false)
     private String status;
 
-    @Column(name = "transaction_timestamp", nullable = false)
+    @Field("transaction_timestamp")
     private LocalDateTime transactionTimestamp;
 
-    @Column(name = "logged_at", nullable = false, updatable = false)
-    private LocalDateTime loggedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.loggedAt = LocalDateTime.now();
-    }
+    @Builder.Default
+    @Field("logged_at")
+    private LocalDateTime loggedAt = LocalDateTime.now();
 }
