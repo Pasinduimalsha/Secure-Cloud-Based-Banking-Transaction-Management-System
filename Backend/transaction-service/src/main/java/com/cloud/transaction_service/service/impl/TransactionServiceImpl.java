@@ -59,6 +59,8 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new InvalidInputException("Sender account is not active");
             }
 
+            //TODO: Before completing transaction add an OTP verification
+
             // 4. Atomic balance update
             sender.setBalance(sender.getBalance().subtract(req.getAmount()));
             receiver.setBalance(receiver.getBalance().add(req.getAmount()));

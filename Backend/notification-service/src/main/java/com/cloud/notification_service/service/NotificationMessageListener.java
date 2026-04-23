@@ -27,7 +27,8 @@ public class NotificationMessageListener {
         
         log.info("Timestamp      : {}", event.getTimestamp());
         log.info("--------------------------------------------------");
-        
+
+        //TODO
         // In a real application, you would invoke an EmailClient (like SendGrid)
         // or an SMS Gateway (like Twilio) here to notify the user.
     }
