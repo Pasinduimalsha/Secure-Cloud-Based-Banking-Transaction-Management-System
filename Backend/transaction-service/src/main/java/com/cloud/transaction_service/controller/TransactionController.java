@@ -26,17 +26,17 @@ public class TransactionController extends AbstractController {
 
     @PostMapping("/deposit")
     public ResponseEntity<Map<String, Object>> deposit(
-            @RequestParam Long accountId,
+            @RequestParam String accountNumber,
             @RequestParam BigDecimal amount) {
-        Transaction txn = transactionService.deposit(accountId, amount);
+        Transaction txn = transactionService.deposit(accountNumber, amount);
         return sendCreatedResponse(txn, "Deposit completed successfully");
     }
 
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdraw(
-            @RequestParam Long accountId,
+            @RequestParam String accountNumber,
             @RequestParam BigDecimal amount) {
-        Transaction txn = transactionService.withdraw(accountId, amount);
+        Transaction txn = transactionService.withdraw(accountNumber, amount);
         return sendCreatedResponse(txn, "Withdrawal completed successfully");
     }
 }

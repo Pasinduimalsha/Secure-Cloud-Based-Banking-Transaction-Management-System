@@ -12,4 +12,7 @@ public interface AccountService {
     AccountDTO updateStatus(Long id, AccountStatus status);
     List<AccountDTO> getAllAccounts();
     List<AccountDTO> getAccountsByUserId(String userId);
+    void deleteAccount(Long id);
+    AccountDTO updateBalance(Long id, BigDecimal delta);
+    AccountDTO getAccountByNumber(String accountNumber);
 }

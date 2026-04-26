@@ -1,19 +1,23 @@
 package com.cloud.transaction_service.service.impl;
 
+import com.cloud.transaction_service.dto.AccountDTO;
 import com.cloud.transaction_service.dto.TransactionEvent;
 import com.cloud.transaction_service.dto.TransferRequest;
 import com.cloud.transaction_service.entity.*;
 import com.cloud.transaction_service.exception.InsufficientBalanceException;
 import com.cloud.transaction_service.exception.InvalidInputException;
 import com.cloud.transaction_service.exception.ResourceNotFoundException;
-import com.cloud.transaction_service.repository.AccountRepository;
 import com.cloud.transaction_service.repository.OutboxRepository;
 import com.cloud.transaction_service.repository.TransactionRepository;
+import com.cloud.transaction_service.service.AccountServiceClient;
 import com.cloud.transaction_service.service.IdempotencyService;
 import com.cloud.transaction_service.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,32 +30,36 @@ import java.util.UUID;
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
-    private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final OutboxRepository outboxRepository;
     private final IdempotencyService idempotencyService;
+    private final AccountServiceClient accountServiceClient;
     private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
     public Transaction transfer(TransferRequest req) {
         log.info("Processing transfer request from {} to {} for amount {}", 
-            req.getSenderAccountId(), req.getReceiverAccountId(), req.getAmount());
+            req.getSenderAccountNumber(), req.getReceiverAccountNumber(), req.getAmount());
 
-        // 1. Idempotency check
         if (!idempotencyService.isFirstRequest(req.getRequestKey(), Duration.ofHours(24))) {
             return transactionRepository.findByRequestKey(req.getRequestKey())
                     .orElseThrow(() -> new RuntimeException("Transaction in progress or duplicate request"));
         }
 
         try {
-            // 2. Load accounts with Pessimistic Lock (Prevents double spending)
-            Account sender = accountRepository.findByIdWithLock(req.getSenderAccountId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Sender account not found"));
-            Account receiver = accountRepository.findByIdWithLock(req.getReceiverAccountId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Receiver account not found"));
+            // 1. Fetch account details by account number
+            AccountDTO sender = accountServiceClient.getAccountByNumber(req.getSenderAccountNumber()).block();
+            AccountDTO receiver = accountServiceClient.getAccountByNumber(req.getReceiverAccountNumber()).block();
 
-            // 3. Validation
+            if (sender == null || receiver == null) {
+                throw new ResourceNotFoundException("One or both accounts not found");
+            }
+
+            // 2. Ownership Validation for Sender
+            checkOwnership(sender.getUserId());
+
+            // 3. Status and Balance Validation
             if (sender.getBalance().compareTo(req.getAmount()) < 0) {
                 throw new InsufficientBalanceException("Insufficient balance");
             }
@@ -59,20 +67,17 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new InvalidInputException("Sender account is not active");
             }
 
-            //TODO: Before completing transaction add an OTP verification
-
-            // 4. Atomic balance update
-            sender.setBalance(sender.getBalance().subtract(req.getAmount()));
-            receiver.setBalance(receiver.getBalance().add(req.getAmount()));
-
-            accountRepository.save(sender);
-            accountRepository.save(receiver);
+            // 4. Update balances in account-service
+            accountServiceClient.updateBalance(sender.getId(), req.getAmount().negate()).block();
+            accountServiceClient.updateBalance(receiver.getId(), req.getAmount()).block();
 
             // 5. Create Transaction Record
             Transaction txn = Transaction.builder()
                     .requestKey(req.getRequestKey())
-                    .senderAccount(sender)
-                    .receiverAccount(receiver)
+                    .senderAccountId(sender.getId())
+                    .senderAccountNumber(sender.getAccountNumber())
+                    .receiverAccountId(receiver.getId())
+                    .receiverAccountNumber(receiver.getAccountNumber())
                     .amount(req.getAmount())
                     .type(TransactionType.TRANSFER)
                     .status(TransactionStatus.SUCCESS)
@@ -80,10 +85,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .build();
             
             Transaction savedTxn = transactionRepository.save(txn);
-
-            // 6. Save to Outbox (Reliable Message Delivery)
             createOutboxEvent(savedTxn, "TRANSACTION_COMPLETED");
-
             return savedTxn;
 
         } catch (Exception e) {
@@ -95,16 +97,18 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction deposit(Long accountId, BigDecimal amount) {
-        Account account = accountRepository.findByIdWithLock(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    public Transaction deposit(String accountNumber, BigDecimal amount) {
+        AccountDTO account = accountServiceClient.getAccountByNumber(accountNumber).block();
+        if (account == null) {
+            throw new ResourceNotFoundException("Account not found");
+        }
 
-        account.setBalance(account.getBalance().add(amount));
-        accountRepository.save(account);
+        accountServiceClient.updateBalance(account.getId(), amount).block();
 
         Transaction txn = Transaction.builder()
                 .requestKey("DEP-" + UUID.randomUUID())
-                .receiverAccount(account)
+                .receiverAccountId(account.getId())
+                .receiverAccountNumber(account.getAccountNumber())
                 .amount(amount)
                 .type(TransactionType.DEPOSIT)
                 .status(TransactionStatus.SUCCESS)
@@ -117,20 +121,25 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public Transaction withdraw(Long accountId, BigDecimal amount) {
-        Account account = accountRepository.findByIdWithLock(accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    public Transaction withdraw(String accountNumber, BigDecimal amount) {
+        AccountDTO account = accountServiceClient.getAccountByNumber(accountNumber).block();
+        if (account == null) {
+            throw new ResourceNotFoundException("Account not found");
+        }
+
+        // Ownership Validation
+        checkOwnership(account.getUserId());
 
         if (account.getBalance().compareTo(amount) < 0) {
             throw new InsufficientBalanceException("Insufficient balance");
         }
 
-        account.setBalance(account.getBalance().subtract(amount));
-        accountRepository.save(account);
+        accountServiceClient.updateBalance(account.getId(), amount.negate()).block();
 
         Transaction txn = Transaction.builder()
                 .requestKey("WTH-" + UUID.randomUUID())
-                .senderAccount(account)
+                .senderAccountId(account.getId())
+                .senderAccountNumber(account.getAccountNumber())
                 .amount(amount)
                 .type(TransactionType.WITHDRAWAL)
                 .status(TransactionStatus.SUCCESS)
@@ -141,13 +150,28 @@ public class TransactionServiceImpl implements TransactionService {
         return savedTxn;
     }
 
+    private void checkOwnership(String accountUserId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+        boolean isStaffOrAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("STAFF") || a.getAuthority().equals("ADMIN"));
+
+        log.debug("Checking ownership: currentUserEmail={}, accountUserId={}, isStaffOrAdmin={}", 
+            currentUserEmail, accountUserId, isStaffOrAdmin);
+
+        if (!isStaffOrAdmin && !currentUserEmail.equals(accountUserId)) {
+            log.error("Ownership check failed! Token user: {}, Account owner: {}", currentUserEmail, accountUserId);
+            throw new AccessDeniedException("You do not have permission to perform this transaction for this account");
+        }
+    }
+
     private void createOutboxEvent(Transaction txn, String eventType) {
         try {
             TransactionEvent event = TransactionEvent.builder()
                     .transactionId(txn.getId())
                     .requestKey(txn.getRequestKey())
-                    .senderAccountId(txn.getSenderAccount() != null ? txn.getSenderAccount().getId() : null)
-                    .receiverAccountId(txn.getReceiverAccount() != null ? txn.getReceiverAccount().getId() : null)
+                    .senderAccountId(txn.getSenderAccountId())
+                    .receiverAccountId(txn.getReceiverAccountId())
                     .amount(txn.getAmount())
                     .type(txn.getType().name())
                     .status(txn.getStatus().name())
@@ -164,7 +188,6 @@ public class TransactionServiceImpl implements TransactionService {
             outboxRepository.save(outbox);
         } catch (Exception e) {
             log.error("Failed to create outbox event: {}", e.getMessage());
-            // This will cause the transaction to rollback, which is what we want for consistency
             throw new RuntimeException("Outbox logging failed", e);
         }
     }
