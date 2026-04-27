@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: account-service
-          image: secure-cloud-based-banking-transaction-management-system-account-service:latest
+          image: pasindu12345/account-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8082
@@ -81,7 +81,7 @@ spec:
     spec:
       containers:
         - name: transaction-service
-          image: secure-cloud-based-banking-transaction-management-system-transaction-service:latest
+          image: pasindu12345/transaction-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8083
@@ -153,7 +153,7 @@ spec:
     spec:
       containers:
         - name: audit-service
-          image: secure-cloud-based-banking-transaction-management-system-audit-service:latest
+          image: pasindu12345/audit-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8084
@@ -200,7 +200,7 @@ spec:
     spec:
       containers:
         - name: notification-service
-          image: secure-cloud-based-banking-transaction-management-system-notification-service:latest
+          image: pasindu12345/notification-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8085
