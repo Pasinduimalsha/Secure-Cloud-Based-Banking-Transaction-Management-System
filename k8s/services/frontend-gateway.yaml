@@ -1,0 +1,96 @@
+# --- API Gateway ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+spec:
+  type: NodePort # Use NodePort for easy local access
+  ports:
+    - port: 8000
+      nodePort: 30000 # Accessible at http://localhost:30000
+  selector:
+    app: api-gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: secure-cloud-based-banking-transaction-management-system-api-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SERVICE_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SERVICE_AUTH_URL
+            - name: SERVICE_ACCOUNT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SERVICE_ACCOUNT_URL
+            - name: SERVICE_TRANSACTION_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SERVICE_TRANSACTION_URL
+            - name: SERVICE_AUDIT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SERVICE_AUDIT_URL
+            - name: SERVICE_NOTIFICATION_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: banking-config
+                  key: SERVICE_NOTIFICATION_URL
+---
+# --- Frontend ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      nodePort: 30001 # Accessible at http://localhost:30001
+  selector:
+    app: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: secure-cloud-based-banking-transaction-management-system-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
