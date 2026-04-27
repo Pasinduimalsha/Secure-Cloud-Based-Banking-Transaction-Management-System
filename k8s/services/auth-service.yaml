@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: secure-cloud-based-banking-transaction-management-system-auth-service:latest
+          image: pasindu12345/auth-service:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8081
