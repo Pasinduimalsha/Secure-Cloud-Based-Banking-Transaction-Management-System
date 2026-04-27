@@ -1,0 +1,75 @@
+# --- Default Deny (Optional but Recommended for High Security) ---
+# This policy blocks all traffic by default. We then explicitly allow what we need.
+# Note: Enabling this might break things if we miss a connection, so we'll be precise.
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-gateway-to-services
+spec:
+  podSelector:
+    matchLabels:
+      # Targets all backend services
+      app: auth-service
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-transaction-to-account
+spec:
+  podSelector:
+    matchLabels:
+      app: account-service
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: transaction-service
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-database-access
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql-db
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: auth-service
+        - podSelector:
+            matchLabels:
+              app: account-service
+        - podSelector:
+            matchLabels:
+              app: transaction-service
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-rabbitmq-access
+spec:
+  podSelector:
+    matchLabels:
+      app: rabbitmq
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: transaction-service
+        - podSelector:
+            matchLabels:
+              app: audit-service
+        - podSelector:
+            matchLabels:
+              app: notification-service
