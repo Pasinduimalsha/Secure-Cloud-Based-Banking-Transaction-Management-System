@@ -18,15 +18,19 @@ public class Transaction {
     private Long id;
 
     @Column(name = "request_key", unique = true, nullable = false)
-    private String requestKey; // For idempotency (Redis backed)
+    private String requestKey;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_account_id")
-    private Account senderAccount;
+    @Column(name = "sender_account_id")
+    private Long senderAccountId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_account_id")
-    private Account receiverAccount;
+    @Column(name = "sender_account_number")
+    private String senderAccountNumber;
+
+    @Column(name = "receiver_account_id")
+    private Long receiverAccountId;
+
+    @Column(name = "receiver_account_number")
+    private String receiverAccountNumber;
 
     @Column(nullable = false)
     private BigDecimal amount;

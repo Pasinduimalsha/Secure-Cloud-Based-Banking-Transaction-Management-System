@@ -30,6 +30,7 @@ public class AccountServiceImpl implements AccountService {
         if (account.getAccountNumber() == null || account.getAccountNumber().isEmpty()) {
             account.setAccountNumber("ACC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
         }
+        account.setStatus(AccountStatus.PENDING);
         Account savedAccount = accountRepository.save(account);
         return accountMapper.toDTO(savedAccount);
     }
@@ -69,5 +70,30 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findByUserId(userId).stream()
                 .map(accountMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAccount(Long id) {
+        if (!accountRepository.existsById(id)) {
+            throw new AccountNotFoundException("Account not found with id: " + id);
+        }
+        accountRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public AccountDTO updateBalance(Long id, BigDecimal delta) {
+        Account account = accountRepository.findById(id)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found with id: " + id));
+        account.setBalance(account.getBalance().add(delta));
+        return accountMapper.toDTO(accountRepository.save(account));
+    }
+
+    @Override
+    public AccountDTO getAccountByNumber(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber)
+                .map(accountMapper::toDTO)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found with number: " + accountNumber));
     }
 }

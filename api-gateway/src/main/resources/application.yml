@@ -3,30 +3,20 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
+      # CORS is now handled by CorsConfig.java
 
 # Service URLs for functional routing
 service:
   auth:
-    url: ${AUTH_SERVICE_URL:http://localhost:8081}
+    url: ${SERVICE_AUTH_URL:http://localhost:8081}
   account:
-    url: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
+    url: ${SERVICE_ACCOUNT_URL:http://localhost:8082}
   transaction:
     url: ${TRANSACTION_SERVICE_URL:http://localhost:8083}
   audit:
-    url: ${AUDIT_SERVICE_URL:http://localhost:8084}
+    url: ${SERVICE_AUDIT_URL:http://localhost:8084}
   notification:
-    url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+    url: ${SERVICE_NOTIFICATION_URL:http://localhost:8085}
 
 server:
   port: 8000
