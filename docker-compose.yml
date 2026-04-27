@@ -181,6 +181,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATA_MONGODB_URI=mongodb://admin:Pasiya12@mongodb:27017/notificationService?authSource=admin
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - MAIL_USERNAME=${MAIL_USERNAME:pasinduimalsha2001@gmail.com}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:@Mailtrap12345}
     restart: always
     networks:
       - banking-network
