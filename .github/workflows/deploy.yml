@@ -40,6 +40,14 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: SonarQube Scan
+        if: matrix.service.name != 'frontend' # Only for Java/Gradle services
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd ${{ matrix.service.context }}
+          ./gradlew sonar --info
+
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:

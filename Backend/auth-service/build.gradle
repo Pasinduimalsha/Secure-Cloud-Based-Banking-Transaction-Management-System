@@ -2,6 +2,15 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.3'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id "org.sonarqube" version "5.1.0.4882"
+}
+
+sonar {
+  properties {
+    property "sonar.projectKey", "secure-bank-auth-service"
+    property "sonar.organization", "pasinduimalsha"
+    property "sonar.host.url", "https://sonarcloud.io"
+  }
 }
 
 group = 'com.cloud'

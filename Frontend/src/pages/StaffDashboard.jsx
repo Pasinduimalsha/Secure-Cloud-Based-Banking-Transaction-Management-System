@@ -24,7 +24,7 @@ const StaffDashboard = () => {
             else if (activeTab === 'transactions') res = await transactionService.getTransactions();
             else if (activeTab === 'audit') res = await auditService.getLogs();
             else if (activeTab === 'notifications') res = await notificationService.getNotifications();
-            
+
             setData(Array.isArray(res) ? res : res?.data || []);
         } catch (err) {
             console.error('Fetch error:', err);
@@ -90,10 +90,10 @@ const StaffDashboard = () => {
                         <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                                 {acc.status === 'PENDING' && (
-                                    <button onClick={() => updateStatus(acc.id, 'ACTIVE')} style={{ color: 'var(--success)', background: 'none' }}><Check size={18}/></button>
+                                    <button onClick={() => updateStatus(acc.id, 'ACTIVE')} style={{ color: 'var(--success)', background: 'none' }}><Check size={18} /></button>
                                 )}
                                 <button onClick={() => updateStatus(acc.id, acc.status === 'FROZEN' ? 'ACTIVE' : 'FROZEN')} style={{ color: 'var(--warning)', background: 'none' }}>
-                                    <Activity size={18}/>
+                                    <Activity size={18} />
                                 </button>
                             </div>
                         </td>
@@ -153,11 +153,8 @@ const StaffDashboard = () => {
         <div style={{ padding: '24px' }}>
             {data.map((n, index) => (
                 <div key={index} className="glass-card" style={{ marginBottom: '16px', borderLeft: '4px solid var(--info)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontWeight: 'bold' }}>{n.title}</span>
-                            <span className="badge badge-success" style={{ fontSize: '0.6rem' }}>EMAIL SENT</span>
-                        </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontWeight: 'bold' }}>{n.title}</span>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleString()}</span>
                     </div>
                     <p style={{ fontSize: '0.9rem' }}>{n.message}</p>
@@ -176,15 +173,15 @@ const StaffDashboard = () => {
                 </div>
                 <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {[
-                        { id: 'operations', label: 'Operations', icon: <Users size={20}/> },
-                        { id: 'transactions', label: 'Transactions', icon: <ArrowRightLeft size={20}/> },
-                        { id: 'audit', label: 'Audit Logs', icon: <FileText size={20}/> },
-                        { id: 'notifications', label: 'Notifications', icon: <Bell size={20}/> }
+                        { id: 'operations', label: 'Operations', icon: <Users size={20} /> },
+                        { id: 'transactions', label: 'Transactions', icon: <ArrowRightLeft size={20} /> },
+                        { id: 'audit', label: 'Audit Logs', icon: <FileText size={20} /> },
+                        { id: 'notifications', label: 'Notifications', icon: <Bell size={20} /> }
                     ].map(tab => (
-                        <button 
+                        <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            style={{ 
+                            style={{
                                 display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: '8px',
                                 background: activeTab === tab.id ? 'rgba(6, 182, 212, 0.1)' : 'none',
                                 color: activeTab === tab.id ? 'var(--info)' : 'var(--text)',
@@ -199,7 +196,7 @@ const StaffDashboard = () => {
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                         <div style={{ width: '40px', height: '40px', borderRadius: '20px', background: 'var(--bg-main)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Activity size={20} color="var(--info)"/>
+                            <Activity size={20} color="var(--info)" />
                         </div>
                         <div>
                             <p style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>{user?.email.split('@')[0]}</p>
@@ -207,7 +204,7 @@ const StaffDashboard = () => {
                         </div>
                     </div>
                     <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--error)', background: 'none', border: 'none', cursor: 'pointer' }}>
-                        <LogOut size={18}/> Logout
+                        <LogOut size={18} /> Logout
                     </button>
                 </div>
             </aside>
@@ -244,7 +241,7 @@ const StaffDashboard = () => {
                     <div style={{ minHeight: '400px' }}>
                         {loading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-                                <Loader2 className="animate-spin" size={32} color="var(--info)"/>
+                                <Loader2 className="animate-spin" size={32} color="var(--info)" />
                             </div>
                         ) : data.length === 0 ? (
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', color: 'var(--text-muted)' }}>
@@ -252,7 +249,7 @@ const StaffDashboard = () => {
                             </div>
                         ) : (
                             <AnimatePresence mode="wait">
-                                <motion.div 
+                                <motion.div
                                     key={activeTab}
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -277,8 +274,8 @@ const StaffDashboard = () => {
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card" style={{ width: '400px' }}>
                             <h3>Manual Deposit</h3>
                             <form onSubmit={handleDeposit} style={{ marginTop: '20px' }}>
-                                <input type="text" placeholder="Account Number" style={{ marginBottom: '16px' }} value={depositData.accountNumber} onChange={e => setDepositData({...depositData, accountNumber: e.target.value})} required />
-                                <input type="number" placeholder="Amount" style={{ marginBottom: '24px' }} value={depositData.amount} onChange={e => setDepositData({...depositData, amount: e.target.value})} required />
+                                <input type="text" placeholder="Account Number" style={{ marginBottom: '16px' }} value={depositData.accountNumber} onChange={e => setDepositData({ ...depositData, accountNumber: e.target.value })} required />
+                                <input type="number" placeholder="Amount" style={{ marginBottom: '24px' }} value={depositData.amount} onChange={e => setDepositData({ ...depositData, amount: e.target.value })} required />
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <button type="button" onClick={() => setShowDepositModal(false)} style={{ flex: 1, background: 'none', border: '1px solid var(--border)' }}>Cancel</button>
                                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Deposit</button>
@@ -292,12 +289,12 @@ const StaffDashboard = () => {
                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card" style={{ width: '400px' }}>
                             <h3>Open Account</h3>
                             <form onSubmit={handleCreateAccount} style={{ marginTop: '20px' }}>
-                                <input type="text" placeholder="Customer Email/ID" style={{ marginBottom: '16px' }} value={createData.userId} onChange={e => setCreateData({...createData, userId: e.target.value})} required />
-                                <select style={{ marginBottom: '16px' }} value={createData.accountType} onChange={e => setCreateData({...createData, accountType: e.target.value})}>
+                                <input type="text" placeholder="Customer Email/ID" style={{ marginBottom: '16px' }} value={createData.userId} onChange={e => setCreateData({ ...createData, userId: e.target.value })} required />
+                                <select style={{ marginBottom: '16px' }} value={createData.accountType} onChange={e => setCreateData({ ...createData, accountType: e.target.value })}>
                                     <option value="SAVINGS">Savings</option>
                                     <option value="CHECKING">Checking</option>
                                 </select>
-                                <input type="number" placeholder="Initial Balance" style={{ marginBottom: '24px' }} value={createData.balance} onChange={e => setCreateData({...createData, balance: e.target.value})} required />
+                                <input type="number" placeholder="Initial Balance" style={{ marginBottom: '24px' }} value={createData.balance} onChange={e => setCreateData({ ...createData, balance: e.target.value })} required />
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, background: 'none', border: '1px solid var(--border)' }}>Cancel</button>
                                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create</button>
