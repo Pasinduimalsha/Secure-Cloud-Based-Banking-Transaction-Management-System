@@ -35,7 +35,7 @@ public class AccountController extends AbstractController {
         if (!isStaffOrAdmin || accountDTO.getUserId() == null) {
             accountDTO.setUserId(authentication.getName());
         }
-        
+
         AccountDTO createdAccount = accountService.createAccount(accountDTO);
         return sendCreatedResponse(createdAccount, "Account created successfully");
     }
@@ -58,7 +58,8 @@ public class AccountController extends AbstractController {
     @GetMapping("/number/{accountNumber}")
     public ResponseEntity<Map<String, Object>> getAccountByNumber(@PathVariable String accountNumber) {
         AccountDTO account = accountService.getAccountByNumber(accountNumber);
-        // Removed ownership check here to allow customers to resolve receiver accounts for transfers
+        // Removed ownership check here to allow customers to resolve receiver accounts
+        // for transfers
         return sendSuccessResponse(account, "Account retrieved successfully by number");
     }
 
@@ -73,8 +74,21 @@ public class AccountController extends AbstractController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllAccounts() {
-        List<AccountDTO> accounts = accountService.getAllAccounts();
-        return sendSuccessResponse(accounts, "All accounts retrieved successfully");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserEmail = authentication.getName();
+        boolean isStaffOrAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("STAFF") || a.getAuthority().equals("ADMIN"));
+
+        List<AccountDTO> accounts;
+        if (isStaffOrAdmin) {
+            accounts = accountService.getAllAccounts();
+            log.debug("Retrieved all accounts for staff/admin user: {}", currentUserEmail);
+        } else {
+            accounts = accountService.getAccountsByUserId(currentUserEmail);
+            log.debug("Retrieved only personal accounts for customer: {}", currentUserEmail);
+        }
+        
+        return sendSuccessResponse(accounts, "Accounts retrieved successfully");
     }
 
     @DeleteMapping("/{accountId}")
@@ -98,8 +112,8 @@ public class AccountController extends AbstractController {
         boolean isStaffOrAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("STAFF") || a.getAuthority().equals("ADMIN"));
 
-        log.debug("Checking ownership: currentUserEmail={}, accountUserId={}, isStaffOrAdmin={}", 
-            currentUserEmail, accountUserId, isStaffOrAdmin);
+        log.debug("Checking ownership: currentUserEmail={}, accountUserId={}, isStaffOrAdmin={}",
+                currentUserEmail, accountUserId, isStaffOrAdmin);
 
         if (!isStaffOrAdmin && !currentUserEmail.equals(accountUserId)) {
             log.error("Ownership check failed! Token user: {}, Account owner: {}", currentUserEmail, accountUserId);

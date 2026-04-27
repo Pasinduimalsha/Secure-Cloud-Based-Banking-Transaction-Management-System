@@ -39,4 +39,8 @@ public class TransactionController extends AbstractController {
         Transaction txn = transactionService.withdraw(accountNumber, amount);
         return sendCreatedResponse(txn, "Withdrawal completed successfully");
     }
+    @GetMapping
+    public ResponseEntity<Map<String, Object>> getAllTransactions() {
+        return sendSuccessResponse(transactionService.getAllTransactions(), "Transactions retrieved successfully");
+    }
 }

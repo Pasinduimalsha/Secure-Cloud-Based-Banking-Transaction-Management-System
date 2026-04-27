@@ -165,6 +165,27 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+    @Override
+    public java.util.List<Transaction> getAllTransactions() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isStaffOrAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("STAFF") || a.getAuthority().equals("ADMIN"));
+
+        if (isStaffOrAdmin) {
+            return transactionRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        } else {
+            java.util.List<AccountDTO> userAccounts = accountServiceClient.getUserAccounts().block();
+            java.util.List<String> accountNumbers = userAccounts.stream()
+                    .map(AccountDTO::getAccountNumber)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            if (accountNumbers.isEmpty()) return java.util.Collections.emptyList();
+            
+            return transactionRepository.findAllBySenderAccountNumberInOrReceiverAccountNumberInOrderByCreatedAtDesc(
+                    accountNumbers, accountNumbers);
+        }
+    }
+
     private void createOutboxEvent(Transaction txn, String eventType) {
         try {
             TransactionEvent event = TransactionEvent.builder()
@@ -175,6 +196,7 @@ public class TransactionServiceImpl implements TransactionService {
                     .amount(txn.getAmount())
                     .type(txn.getType().name())
                     .status(txn.getStatus().name())
+                    .userId(SecurityContextHolder.getContext().getAuthentication().getName())
                     .timestamp(txn.getCreatedAt())
                     .build();
 

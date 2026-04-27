@@ -7,4 +7,5 @@ public interface TransactionService {
     Transaction transfer(TransferRequest request);
     Transaction deposit(String accountNumber, java.math.BigDecimal amount);
     Transaction withdraw(String accountNumber, java.math.BigDecimal amount);
+    java.util.List<Transaction> getAllTransactions();
 }

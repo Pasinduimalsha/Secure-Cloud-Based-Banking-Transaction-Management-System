@@ -39,6 +39,7 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
         wait-duration-in-open-state: 5s
         failure-rate-threshold: 50
+        timeout-duration: 10s
     instances:
       authServiceCircuitBreaker:
         base-config: default

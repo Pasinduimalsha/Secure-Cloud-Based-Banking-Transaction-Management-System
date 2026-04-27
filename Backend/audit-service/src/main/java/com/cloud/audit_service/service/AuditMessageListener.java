@@ -25,6 +25,7 @@ public class AuditMessageListener {
             AuditLog auditLog = AuditLog.builder()
                     .transactionId(event.getTransactionId())
                     .requestKey(event.getRequestKey())
+                    .userId(event.getUserId())
                     .senderAccountId(event.getSenderAccountId())
                     .receiverAccountId(event.getReceiverAccountId())
                     .amount(event.getAmount())

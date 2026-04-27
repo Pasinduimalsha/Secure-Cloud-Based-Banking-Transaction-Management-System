@@ -19,5 +19,6 @@ public class TransactionEvent {
     private BigDecimal amount;
     private String type;
     private String status;
+    private String userId;
     private LocalDateTime timestamp;
 }

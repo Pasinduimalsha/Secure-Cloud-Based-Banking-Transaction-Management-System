@@ -18,7 +18,9 @@ public class Notification {
     private String id;
 
     @Field("user_id")
-    private Long userId;
+    private String userId;
+
+    private String title;
 
     private String message;
 

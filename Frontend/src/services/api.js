@@ -50,12 +50,22 @@ export const accountService = {
     createAccount: (data) => api.post('/accounts', data),
     getBalance: (id) => api.get(`/accounts/${id}/balance`),
     updateStatus: (id, status) => api.put(`/accounts/${id}/status`, { status }),
+    deleteAccount: (id) => api.delete(`/accounts/${id}`),
 };
 
 export const transactionService = {
+    getTransactions: () => api.get('/transactions'),
     transfer: (data) => api.post('/transactions/transfer', data),
     deposit: (accountNumber, amount) => api.post(`/transactions/deposit?accountNumber=${accountNumber}&amount=${amount}`),
     withdraw: (accountNumber, amount) => api.post(`/transactions/withdraw?accountNumber=${accountNumber}&amount=${amount}`),
+};
+
+export const auditService = {
+    getLogs: (userId) => api.get('/audit/logs' + (userId ? `?userId=${userId}` : '')),
+};
+
+export const notificationService = {
+    getNotifications: (userId) => api.get('/notifications' + (userId ? `?userId=${userId}` : '')),
 };
 
 export default api;

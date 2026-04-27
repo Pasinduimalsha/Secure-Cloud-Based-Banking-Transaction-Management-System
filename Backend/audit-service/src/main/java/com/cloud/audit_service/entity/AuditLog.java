@@ -18,6 +18,9 @@ public class AuditLog {
     @Id
     private String id; // MongoDB IDs are typically Strings (ObjectIds)
 
+    @Field("user_id")
+    private String userId;
+
     @Field("transaction_id")
     private Long transactionId;
 
