@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   # ---------------- Infrastructure ---------------- #
@@ -18,6 +17,8 @@ services:
       timeout: 5s
       retries: 5
     restart: always
+    networks:
+      - banking-network
 
   mongodb:
     image: mongo:latest
@@ -29,7 +30,10 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=Pasiya12
     volumes:
       - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     restart: always
+    networks:
+      - banking-network
 
   redis:
     image: redis:alpine
@@ -39,6 +43,8 @@ services:
     volumes:
       - redis_data:/data
     restart: always
+    networks:
+      - banking-network
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -52,6 +58,13 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - banking-network
 
   # ---------------- Microservices ---------------- #
   api-gateway:
@@ -75,6 +88,8 @@ services:
       - audit-service
       - notification-service
     restart: always
+    networks:
+      - banking-network
 
   auth-service:
     build:
@@ -85,10 +100,13 @@ services:
       mysql-db:
         condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/authService
       - SPRING_DATASOURCE_USERNAME=authService_user
       - SPRING_DATASOURCE_PASSWORD=authService_pass12
     restart: always
+    networks:
+      - banking-network
 
   account-service:
     build: 
@@ -99,10 +117,13 @@ services:
       mysql-db:
         condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/accountService
-      - SPRING_DATASOURCE_USERNAME=banking_service_user
-      - SPRING_DATASOURCE_PASSWORD=banking_pass12
+      - SPRING_DATASOURCE_USERNAME=accountService_user
+      - SPRING_DATASOURCE_PASSWORD=accountService_pass12
     restart: always
+    networks:
+      - banking-network
 
   transaction-service:
     build: 
@@ -115,14 +136,18 @@ services:
       redis:
         condition: service_started
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/transactionService
-      - SPRING_DATASOURCE_USERNAME=banking_service_user
-      - SPRING_DATASOURCE_PASSWORD=banking_pass12
+      - SPRING_DATASOURCE_USERNAME=transactionService_user
+      - SPRING_DATASOURCE_PASSWORD=transactionService_pass12
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - ACCOUNT_SERVICE_URL=http://account-service:8082
     restart: always
+    networks:
+      - banking-network
 
   audit-service:
     build: 
@@ -133,11 +158,14 @@ services:
       mongodb:
         condition: service_started
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATA_MONGODB_URI=mongodb://admin:Pasiya12@mongodb:27017/auditService?authSource=admin
       - SPRING_RABBITMQ_HOST=rabbitmq
     restart: always
+    networks:
+      - banking-network
 
   notification-service:
     build: 
@@ -148,15 +176,32 @@ services:
       mongodb:
         condition: service_started
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATA_MONGODB_URI=mongodb://admin:Pasiya12@mongodb:27017/notificationService?authSource=admin
       - SPRING_RABBITMQ_HOST=rabbitmq
     restart: always
+    networks:
+      - banking-network
 
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: banking-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-gateway
+    restart: always
+    networks:
+      - banking-network
 networks:
-  default:
+  banking-network:
     name: banking-network
+    driver: bridge
+
 
 volumes:
   mysql_data:
