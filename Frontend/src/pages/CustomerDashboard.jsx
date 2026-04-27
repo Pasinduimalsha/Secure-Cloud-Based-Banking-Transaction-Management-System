@@ -101,8 +101,11 @@ const CustomerDashboard = () => {
         <div style={{ padding: '24px' }}>
             {data.map((n, index) => (
                 <div key={index} className="glass-card" style={{ marginBottom: '16px', borderLeft: '4px solid var(--primary)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <span style={{ fontWeight: 'bold' }}>{n.title}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 'bold' }}>{n.title}</span>
+                            <span className="badge badge-success" style={{ fontSize: '0.6rem' }}>EMAIL SENT</span>
+                        </div>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{new Date(n.createdAt).toLocaleString()}</span>
                     </div>
                     <p style={{ fontSize: '0.9rem' }}>{n.message}</p>
