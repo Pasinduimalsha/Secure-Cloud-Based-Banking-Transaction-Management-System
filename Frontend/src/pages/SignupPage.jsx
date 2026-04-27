@@ -3,6 +3,7 @@ import { authService } from '../services/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 const SignupPage = () => {
     const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const SignupPage = () => {
         setError('');
         try {
             await authService.signup(formData);
-            alert('Signup successful! Please log in.');
+            toast.success('Signup successful! Please log in.');
             navigate('/login');
         } catch (err) {
             setError(err.message || 'Signup failed. Please try again.');

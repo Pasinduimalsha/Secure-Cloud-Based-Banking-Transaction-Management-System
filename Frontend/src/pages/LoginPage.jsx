@@ -3,24 +3,24 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError('');
         try {
             await login({ email, password });
+            toast.success('Welcome back!');
             navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'Login failed. Please check your credentials.');
+            toast.error(err.message || 'Login failed. Please check your credentials.');
         } finally {
             setLoading(false);
         }
@@ -46,20 +46,6 @@ const LoginPage = () => {
                     </h1>
                     <p style={{ color: 'var(--text-muted)' }}>Secure access to your banking portal</p>
                 </div>
-
-                {error && (
-                    <div style={{ 
-                        padding: '12px', 
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)', 
-                        border: '1px solid var(--error)',
-                        borderRadius: '8px',
-                        color: 'var(--error)',
-                        marginBottom: '20px',
-                        fontSize: '0.9rem'
-                    }}>
-                        {error}
-                    </div>
-                )}
 
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '20px' }}>

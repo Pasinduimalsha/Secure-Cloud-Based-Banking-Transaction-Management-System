@@ -58,4 +58,20 @@ public class AccountServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+    public Mono<java.util.List<AccountDTO>> getUserAccounts() {
+        return accountWebClient.get()
+                .uri("/api/v1/accounts")
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .map(response -> {
+                    java.util.List<Map<String, Object>> data = (java.util.List<Map<String, Object>>) response.get("data");
+                    return data.stream().map(item -> AccountDTO.builder()
+                            .id(Long.valueOf(item.get("id").toString()))
+                            .accountNumber(item.get("accountNumber").toString())
+                            .userId(item.get("userId").toString())
+                            .balance(new java.math.BigDecimal(item.get("balance").toString()))
+                            .status(item.get("status").toString())
+                            .build()).collect(java.util.stream.Collectors.toList());
+                });
+    }
 }
