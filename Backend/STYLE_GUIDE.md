@@ -184,7 +184,7 @@ server.port=[port]
 # Local development configuration (MySQL)
 spring.datasource.url=jdbc:mysql://localhost:3306/[db_name]?createDatabaseIfNotExist=true
 spring.datasource.username=root
-spring.datasource.password=@Pasiya12
+spring.datasource.password=your_secure_password
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # JPA Configuration
