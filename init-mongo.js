@@ -2,7 +2,7 @@ db = db.getSiblingDB('auditService');
 
 db.createUser({
   user: 'admin',
-  pwd: 'Pasiya12',
+  pwd: process.env.MONGODB_ADMIN_PASS || 'Pasiya12',
   roles: [
     {
       role: 'readWrite',
