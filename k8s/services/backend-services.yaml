@@ -220,13 +220,13 @@ spec:
                 configMapKeyRef:
                   name: banking-config
                   key: SPRING_RABBITMQ_HOST
-            - name: MAIL_USERNAME
+            - name: MAILTRAP_API_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: banking-secrets
-                  key: MAIL_USERNAME
-            - name: MAIL_PASSWORD
+                  key: MAILTRAP_API_TOKEN
+            - name: MAILTRAP_FROM_EMAIL
               valueFrom:
                 secretKeyRef:
                   name: banking-secrets
-                  key: MAIL_PASSWORD
+                  key: MAILTRAP_FROM_EMAIL
