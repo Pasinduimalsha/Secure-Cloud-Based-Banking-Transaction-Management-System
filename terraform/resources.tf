@@ -11,6 +11,22 @@ resource "aws_security_group" "banking_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTP (Required for SSL/ACME challenges)
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # HTTPS (For SSL traffic)
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Kubernetes API
   ingress {
     from_port   = 6443
