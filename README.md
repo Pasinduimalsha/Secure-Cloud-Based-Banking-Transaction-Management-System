@@ -7,9 +7,21 @@ A robust, secure, and scalable microservices-based banking system designed for h
 
 ---
 
+## 🌐 Live Demo
+
+> [!NOTE]
+> **Live URL**: [https://securebankingsys.indevs.in/](https://securebankingsys.indevs.in/)
+> - **SSL Enabled**: The application is served over HTTPS for secure communication.
+> - **Status**: This instance is active for demonstration purposes only. To manage costs, the instance will be taken down following the demo period.
+
+---
+
 ## 🏗️ Architecture Overview
 
+![Component Diagram](./docs/assets/component_diagram.png)
+
 The system is built on a **Microservices Architecture**, where each service is responsible for a specific domain. Communication between services is handled via synchronous REST APIs (through an API Gateway) and asynchronous event-driven messaging.
+
 
 ### 🧩 Components & Responsibilities
 
@@ -118,23 +130,60 @@ npm run dev
 
 ---
 
+## 📊 Database Schema & Example Data
+
+The system uses a combination of Relational (MySQL) and NoSQL (MongoDB) databases.
+
+- **Schema Definitions**: You can find the complete SQL schema in [docs/database/schema.sql](./docs/database/schema.sql).
+- **Example Dataset**: A sample dataset for testing (including an admin user and demo customers) is available in [docs/database/seed.sql](./docs/database/seed.sql).
+
+### 🛠️ Entity Relationship (ER) Summary
+- **Users**: Managed by `auth-service`. Each user has an email, role (ADMIN, STAFF, CUSTOMER), and status.
+- **Accounts**: Managed by `account-service`. Linked to users via `user_id`.
+- **Transactions**: Managed by `transaction-service`. Records all movements of funds with status tracking and idempotency.
+- **Audit Logs**: Managed by `audit-service`. Documented in MongoDB as unstructured JSON events.
+
+---
+
+## ⚙️ Detailed Configurations
+
+The system relies on several environment variables defined in your `.env` file. Below is a breakdown of the most critical ones:
+
+| Variable | Purpose | Default / Example |
+| :--- | :--- | :--- |
+| `MYSQL_ROOT_PASSWORD` | Root password for the MySQL container. | `Pasiya12` |
+| `AUTH_DB_PASS` | Password for the `authService_user`. | `authService_pass12` |
+| `JWT_SECRET` | Secret key used to sign JWT tokens (Min 256-bit). | (SHA-256 string) |
+| `MONGODB_ADMIN_PASS` | Password for the MongoDB admin user. | `Pasiya12` |
+| `MAIL_USERNAME` | SMTP username for the Notification Service. | (Mailtrap user) |
+| `SPRING_PROFILES_ACTIVE`| Set to `docker` when running in containers. | `docker` |
+
+---
+
+## 🚀 Deployment Architecture
+
+![Deployment Diagram](./docs/assets/deployment_diagram.png)
+
+The system is deployed on AWS using a highly available and secure infrastructure. The CI/CD pipeline automates the build and deployment process to an EKS (Elastic Kubernetes Service) cluster.
+
+---
+
 ## 📁 Project Structure
+
 
 ```text
 .
 ├── Backend/                # Microservices source code
-│   ├── account-service/    # Account management
-│   ├── audit-service/      # Security auditing
-│   ├── auth-service/       # User Auth & RBAC
-│   ├── notification-service/# Messaging consumer
-│   └── transaction-service/# Core business logic
 ├── Frontend/               # React + Vite application
 ├── api-gateway/            # Spring Cloud Gateway
+├── docs/                   # Documentation & Database Assets
+│   └── database/           # schema.sql & seed.sql
 ├── k8s/                    # Kubernetes manifests
 ├── terraform/              # Infrastructure as Code
 ├── docker-compose.yml      # Full system orchestration
 └── docker-compose-infra.yml# Databases & Messaging only
 ```
+
 
 ---
 
