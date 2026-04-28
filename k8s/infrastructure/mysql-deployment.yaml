@@ -9,6 +9,17 @@ spec:
     app: mysql-db
   clusterIP: None # Headless service for direct access
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -63,7 +74,8 @@ spec:
             periodSeconds: 10
       volumes:
         - name: mysql-persistent-storage
-          emptyDir: {} # Use emptyDir for local dev; PVC is better for real cloud
+          persistentVolumeClaim:
+            claimName: mysql-pvc
         - name: init-db
           configMap:
             name: mysql-init-script

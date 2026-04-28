@@ -8,6 +8,17 @@ spec:
   selector:
     app: mongodb
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,7 +55,8 @@ spec:
               mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: mongodb-data
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
         - name: init-mongo
           configMap:
             name: mongodb-init-script
