@@ -127,8 +127,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
 
-          # Inject secrets into secrets.yaml template
+          # Inject secrets into manifests template
           envsubst < k8s/secrets.yaml > k8s/secrets.yaml.tmp && mv k8s/secrets.yaml.tmp k8s/secrets.yaml
+          envsubst < k8s/configmap.yaml > k8s/configmap.yaml.tmp && mv k8s/configmap.yaml.tmp k8s/configmap.yaml
 
           # Update image tags in manifests locally before transferring
           find k8s/services -type f -name "*.yaml" -exec sed -i "s|:latest|:${{ github.sha }}|g" {} +
