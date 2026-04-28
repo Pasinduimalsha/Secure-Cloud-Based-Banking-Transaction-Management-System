@@ -19,5 +19,4 @@ out/
 init-db.sh
 init-mongo.js
 docker-compose-infra.yml
-*.env.example
 implementation_guide.md
