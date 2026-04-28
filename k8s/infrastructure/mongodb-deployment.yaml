@@ -58,6 +58,6 @@ data:
     db = db.getSiblingDB('admin');
     db.auth(process.env.MONGO_INITDB_ROOT_USERNAME, process.env.MONGO_INITDB_ROOT_PASSWORD);
     db = db.getSiblingDB('auditService');
-    db.createUser({ user: 'admin', pwd: 'Pasiya12', roles: [{ role: 'readWrite', db: 'auditService' }] });
+    db.createUser({ user: 'admin', pwd: '${MONGODB_ADMIN_PASS}', roles: [{ role: 'readWrite', db: 'auditService' }] });
     db = db.getSiblingDB('notificationService');
-    db.createUser({ user: 'admin', pwd: 'Pasiya12', roles: [{ role: 'readWrite', db: 'notificationService' }] });
+    db.createUser({ user: 'admin', pwd: '${MONGODB_ADMIN_PASS}', roles: [{ role: 'readWrite', db: 'notificationService' }] });

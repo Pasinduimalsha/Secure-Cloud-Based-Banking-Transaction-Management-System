@@ -17,5 +17,6 @@ out/
 # Application Specific
 **/application-local.properties
 init-db.sh
+init-mongo.js
 docker-compose-infra.yml
 *.env.example
