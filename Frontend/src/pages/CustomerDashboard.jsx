@@ -12,7 +12,7 @@ const CustomerDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [createData, setCreateData] = useState({ accountType: 'SAVINGS', balance: '0' });
+    const [createData, setCreateData] = useState({ accountType: 'SAVINGS', balance: '0', nic: '' });
     const [transferData, setTransferData] = useState({ senderAccountNumber: '', receiverAccountNumber: '', amount: '', description: '' });
 
     const fetchData = async () => {
@@ -52,6 +52,7 @@ const CustomerDashboard = () => {
         try {
             await accountService.createAccount({ ...createData, userId: user.email });
             setShowCreateModal(false);
+            setCreateData({ accountType: 'SAVINGS', balance: '0', nic: '' });
             fetchData();
             toast.info('Application submitted for verification');
         } catch (err) { toast.error('Application failed'); }
@@ -241,7 +242,8 @@ const CustomerDashboard = () => {
                                     <option value="SAVINGS">Savings</option>
                                     <option value="CHECKING">Checking</option>
                                 </select>
-                                <input type="number" placeholder="Initial Deposit" style={{ marginBottom: '24px' }} value={createData.balance} onChange={e => setCreateData({...createData, balance: e.target.value})} required />
+                                <input type="number" placeholder="Initial Deposit" style={{ marginBottom: '16px' }} value={createData.balance} onChange={e => setCreateData({...createData, balance: e.target.value})} required />
+                                <input type="text" placeholder="NIC / Identity Number" style={{ marginBottom: '24px' }} value={createData.nic} onChange={e => setCreateData({...createData, nic: e.target.value})} required />
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, background: 'none', border: '1px solid var(--border)' }}>Cancel</button>
                                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Submit</button>

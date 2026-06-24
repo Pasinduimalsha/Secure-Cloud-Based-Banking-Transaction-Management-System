@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class TransactionEvent {
     private Long transactionId;
     private String requestKey;
-    private Long senderAccountId;
-    private Long receiverAccountId;
+    private String senderAccountNumber;
+    private String receiverAccountNumber;
     private BigDecimal amount;
     private String type;
     private String status;

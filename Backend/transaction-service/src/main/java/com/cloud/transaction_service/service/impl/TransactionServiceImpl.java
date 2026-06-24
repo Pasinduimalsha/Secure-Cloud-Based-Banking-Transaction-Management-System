@@ -74,9 +74,7 @@ public class TransactionServiceImpl implements TransactionService {
             // 5. Create Transaction Record
             Transaction txn = Transaction.builder()
                     .requestKey(req.getRequestKey())
-                    .senderAccountId(sender.getId())
                     .senderAccountNumber(sender.getAccountNumber())
-                    .receiverAccountId(receiver.getId())
                     .receiverAccountNumber(receiver.getAccountNumber())
                     .amount(req.getAmount())
                     .type(TransactionType.TRANSFER)
@@ -107,7 +105,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction txn = Transaction.builder()
                 .requestKey("DEP-" + UUID.randomUUID())
-                .receiverAccountId(account.getId())
                 .receiverAccountNumber(account.getAccountNumber())
                 .amount(amount)
                 .type(TransactionType.DEPOSIT)
@@ -138,7 +135,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction txn = Transaction.builder()
                 .requestKey("WTH-" + UUID.randomUUID())
-                .senderAccountId(account.getId())
                 .senderAccountNumber(account.getAccountNumber())
                 .amount(amount)
                 .type(TransactionType.WITHDRAWAL)
@@ -191,8 +187,8 @@ public class TransactionServiceImpl implements TransactionService {
             TransactionEvent event = TransactionEvent.builder()
                     .transactionId(txn.getId())
                     .requestKey(txn.getRequestKey())
-                    .senderAccountId(txn.getSenderAccountId())
-                    .receiverAccountId(txn.getReceiverAccountId())
+                    .senderAccountNumber(txn.getSenderAccountNumber())
+                    .receiverAccountNumber(txn.getReceiverAccountNumber())
                     .amount(txn.getAmount())
                     .type(txn.getType().name())
                     .status(txn.getStatus().name())

@@ -26,6 +26,9 @@ public class Account {
     @Column(name = "user_id", nullable = false)
     private String userId;
 
+    @Column(name = "nic", nullable = false)
+    private String nic;
+
     @Column(nullable = false)
     private BigDecimal balance;
 

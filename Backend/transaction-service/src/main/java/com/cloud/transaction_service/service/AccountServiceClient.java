@@ -38,6 +38,7 @@ public class AccountServiceClient {
                 .id(Long.valueOf(data.get("id").toString()))
                 .accountNumber(data.get("accountNumber").toString())
                 .userId(data.get("userId").toString())
+                .nic(data.get("nic") != null ? data.get("nic").toString() : null)
                 .balance(new BigDecimal(data.get("balance").toString()))
                 .status(data.get("status").toString())
                 .build();
@@ -69,6 +70,7 @@ public class AccountServiceClient {
                             .id(Long.valueOf(item.get("id").toString()))
                             .accountNumber(item.get("accountNumber").toString())
                             .userId(item.get("userId").toString())
+                            .nic(item.get("nic") != null ? item.get("nic").toString() : null)
                             .balance(new java.math.BigDecimal(item.get("balance").toString()))
                             .status(item.get("status").toString())
                             .build()).collect(java.util.stream.Collectors.toList());

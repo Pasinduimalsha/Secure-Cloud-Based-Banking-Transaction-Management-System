@@ -20,14 +20,8 @@ public class Transaction {
     @Column(name = "request_key", unique = true, nullable = false)
     private String requestKey;
 
-    @Column(name = "sender_account_id")
-    private Long senderAccountId;
-
     @Column(name = "sender_account_number")
     private String senderAccountNumber;
-
-    @Column(name = "receiver_account_id")
-    private Long receiverAccountId;
 
     @Column(name = "receiver_account_number")
     private String receiverAccountNumber;

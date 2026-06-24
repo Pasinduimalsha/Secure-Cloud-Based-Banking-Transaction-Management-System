@@ -21,4 +21,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     List<Account> findByUserId(String userId);
 
     Optional<Account> findByAccountNumber(String accountNumber);
+
+    boolean existsByNic(String nic);
 }

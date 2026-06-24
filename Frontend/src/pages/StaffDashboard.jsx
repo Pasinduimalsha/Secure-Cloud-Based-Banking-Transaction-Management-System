@@ -14,7 +14,7 @@ const StaffDashboard = () => {
     const [showDepositModal, setShowDepositModal] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [depositData, setDepositData] = useState({ accountNumber: '', amount: '' });
-    const [createData, setCreateData] = useState({ userId: '', accountType: 'SAVINGS', balance: '0' });
+    const [createData, setCreateData] = useState({ userId: '', accountType: 'SAVINGS', balance: '0', nic: '' });
 
     const fetchData = async () => {
         setLoading(true);
@@ -61,7 +61,7 @@ const StaffDashboard = () => {
         try {
             await accountService.createAccount(createData);
             setShowCreateModal(false);
-            setCreateData({ userId: '', accountType: 'SAVINGS', balance: '0' });
+            setCreateData({ userId: '', accountType: 'SAVINGS', balance: '0', nic: '' });
             fetchData();
             toast.success('Account created successfully!');
         } catch (err) { toast.error('Creation failed: ' + (err.message || 'Check user ID')); }
@@ -294,7 +294,8 @@ const StaffDashboard = () => {
                                     <option value="SAVINGS">Savings</option>
                                     <option value="CHECKING">Checking</option>
                                 </select>
-                                <input type="number" placeholder="Initial Balance" style={{ marginBottom: '24px' }} value={createData.balance} onChange={e => setCreateData({ ...createData, balance: e.target.value })} required />
+                                <input type="number" placeholder="Initial Balance" style={{ marginBottom: '16px' }} value={createData.balance} onChange={e => setCreateData({ ...createData, balance: e.target.value })} required />
+                                <input type="text" placeholder="NIC / Identity Number" style={{ marginBottom: '24px' }} value={createData.nic} onChange={e => setCreateData({ ...createData, nic: e.target.value })} required />
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, background: 'none', border: '1px solid var(--border)' }}>Cancel</button>
                                     <button type="submit" className="btn-primary" style={{ flex: 1 }}>Create</button>

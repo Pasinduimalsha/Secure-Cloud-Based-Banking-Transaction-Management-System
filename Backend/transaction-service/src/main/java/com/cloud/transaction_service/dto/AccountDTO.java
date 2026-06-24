@@ -14,6 +14,7 @@ public class AccountDTO {
     private Long id;
     private String accountNumber;
     private String userId;
+    private String nic;
     private BigDecimal balance;
     private String accountType;
     private String status;

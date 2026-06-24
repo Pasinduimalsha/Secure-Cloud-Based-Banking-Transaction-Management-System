@@ -12,7 +12,7 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [createData, setCreateData] = useState({ userId: '', accountType: 'SAVINGS', balance: '0' });
+    const [createData, setCreateData] = useState({ userId: '', accountType: 'SAVINGS', balance: '0', nic: '' });
 
     const fetchData = async () => {
         setLoading(true);
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
         try {
             await accountService.createAccount(createData);
             setShowCreateModal(false);
-            setCreateData({ userId: '', accountType: 'SAVINGS', balance: '0' });
+            setCreateData({ userId: '', accountType: 'SAVINGS', balance: '0', nic: '' });
             fetchData();
             toast.success('New account created!');
         } catch (err) { toast.error('Creation failed: ' + (err.message || 'Unknown error')); }
@@ -286,9 +286,13 @@ const AdminDashboard = () => {
                                         <option value="BUSINESS">Business</option>
                                     </select>
                                 </div>
-                                <div style={{ marginBottom: '24px' }}>
+                                <div style={{ marginBottom: '16px' }}>
                                     <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '8px' }}>Initial Balance ($)</label>
                                     <input type="number" value={createData.balance} onChange={e => setCreateData({...createData, balance: e.target.value})} required/>
+                                </div>
+                                <div style={{ marginBottom: '24px' }}>
+                                    <label style={{ fontSize: '0.8rem', display: 'block', marginBottom: '8px' }}>NIC / Identity Number</label>
+                                    <input type="text" value={createData.nic} onChange={e => setCreateData({...createData, nic: e.target.value})} required/>
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     <button type="button" onClick={() => setShowCreateModal(false)} style={{ flex: 1, background: 'none', border: '1px solid var(--border)', borderRadius: '10px' }}>Cancel</button>

@@ -2,6 +2,7 @@ package com.cloud.account_service.dto;
 
 import com.cloud.account_service.entity.AccountStatus;
 import com.cloud.account_service.entity.AccountType;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,9 @@ public class AccountDTO {
     
     @NotNull(message = "User identifier is required")
     private String userId;
+    
+    @NotBlank(message = "NIC is required")
+    private String nic;
     
     @PositiveOrZero(message = "Balance cannot be negative")
     private BigDecimal balance;

@@ -27,11 +27,11 @@ public class AuditLog {
     @Field("request_key")
     private String requestKey;
 
-    @Field("sender_account_id")
-    private Long senderAccountId;
+    @Field("sender_account_number")
+    private String senderAccountNumber;
 
-    @Field("receiver_account_id")
-    private Long receiverAccountId;
+    @Field("receiver_account_number")
+    private String receiverAccountNumber;
 
     private BigDecimal amount;
 
